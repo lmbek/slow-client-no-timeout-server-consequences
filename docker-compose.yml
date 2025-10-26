@@ -1,0 +1,18 @@
+services:
+  php:
+    image: slow-php
+    build:
+      context: ./php-server
+    ports:
+      - "8080:8080"
+    # Uncomment to always restart unless you stop it manually
+    # restart: unless-stopped
+    # Working dir and command are defined by the Dockerfile
+    # container_name: slow-php-container
+
+# Use with:
+# - docker compose up -d        (builds if needed and starts in background)
+# - docker compose up --build   (force rebuild)
+# - docker compose down         (stop and remove)
+# - docker compose logs -f      (follow logs)
+# - docker compose ps           (status)
