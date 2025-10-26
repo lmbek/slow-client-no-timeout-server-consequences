@@ -47,3 +47,5 @@ Takeaway
 - Timeouts are not about being strict; they are about being safe.
 - With timeouts, one slow client cannot block everyone else.
 - Always set timeouts. They protect your users, your servers, and your peace of mind.
+
+... Also note how it's much harder to take the Go server down than the PHP server. This just shows how php is not good for critical services
