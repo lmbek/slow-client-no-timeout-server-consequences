@@ -49,3 +49,30 @@ Takeaway
 - Always set timeouts. They protect your users, your servers, and your peace of mind.
 
 ... Also note how it's much harder to take the Go server down than the PHP server. This just shows how php is not good for critical services
+
+Running the demo servers with Docker
+
+- PHP server (port 8080):
+  - docker compose up -d php
+  - Visit http://localhost:8080/
+
+- Go server (port 8081 on host):
+  - docker compose up -d go
+  - Visit http://localhost:8081/
+  - The Go server in the container listens on 0.0.0.0:8081; docker-compose exposes it on the same port on the host.
+
+Build images explicitly (optional):
+- docker compose build php
+- docker compose build go
+
+Stop and remove:
+- docker compose down
+
+Using the clients against the Go server in Docker
+- Default clients point to http://localhost:8080/upload. To target the dockerized Go server, you can either specify the full URL with port 8081 or simply append ?port=8081 to the URL. Examples:
+  - go run client/hanging/hanging_client.go -url=http://localhost:8080/upload?port=8081 -conns=200
+  - go run client/fast/fast_client.go -url=http://localhost:8080/upload?port=8081 -reqs=200 -parallel=8
+  - go run client/slow/slow_client.go -url=http://localhost:8080/upload?port=8081
+  - go run client/slow-many-requests/slow_many_requests_client.go -url=http://localhost:8080/upload?port=8081
+  - go run client/active/active_client.go -url=http://localhost:8080/upload?port=8081
+- Note: The clients will strip the `port` query parameter before sending the request and apply it to the host:port target.

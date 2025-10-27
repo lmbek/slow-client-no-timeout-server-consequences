@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"sync/atomic"
@@ -132,6 +133,13 @@ func main() {
 	)
 	flag.Parse()
 
+	// Optional port override via query parameter: ?port=NNNN
+	if newURL, err := applyPortOverride(*url); err == nil {
+		*url = newURL
+	} else {
+		log.Fatalf("invalid url: %v", err)
+	}
+
 	if *rateMB <= 0 || *duration <= 0 || *parallel <= 0 {
 		logFatal("invalid flags: rateMB, duration and parallel must be > 0")
 	}
@@ -221,4 +229,26 @@ func main() {
 func logFatal(msg string) {
 	fmt.Fprintln(os.Stderr, msg)
 	os.Exit(2)
+}
+
+// applyPortOverride allows specifying ?port=NNNN in the URL to override its network port.
+// It removes the port query parameter from the final request URL.
+func applyPortOverride(raw string) (string, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return "", err
+	}
+	q := u.Query()
+	p := q.Get("port")
+	if p == "" {
+		return raw, nil
+	}
+	q.Del("port")
+	u.RawQuery = q.Encode()
+	hostname := u.Hostname()
+	if hostname == "" {
+		hostname = u.Host
+	}
+	u.Host = net.JoinHostPort(hostname, p)
+	return u.String(), nil
 }

@@ -12,6 +12,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"sync"
 	"time"
 )
@@ -26,6 +27,13 @@ func main() {
 		timeout  = flag.Duration("timeout", 30*time.Second, "per-request timeout")
 	)
 	flag.Parse()
+
+	// Optional port override via query parameter: ?port=NNNN
+	if newURL, err := applyPortOverride(*url); err == nil {
+		*url = newURL
+	} else {
+		log.Fatalf("invalid url: %v", err)
+	}
 
 	payload := bytes.Repeat([]byte{'A'}, *size)
 
@@ -110,4 +118,27 @@ func main() {
 
 	fmt.Printf("done: ok=%d fail=%d in %v (%.2f req/s)\n",
 		ok, fail, elapsed, float64(*reqs)/elapsed.Seconds())
+}
+
+// applyPortOverride allows specifying ?port=NNNN in the URL to override its network port.
+// It removes the port query parameter from the final request URL.
+func applyPortOverride(raw string) (string, error) {
+	u, err := url.Parse(raw)
+	if err != nil {
+		return "", err
+	}
+	q := u.Query()
+	p := q.Get("port")
+	if p == "" {
+		return raw, nil
+	}
+	q.Del("port")
+	u.RawQuery = q.Encode()
+	// Use hostname (without any existing port) and join with the override port
+	hostname := u.Hostname()
+	if hostname == "" {
+		hostname = u.Host
+	}
+	u.Host = net.JoinHostPort(hostname, p)
+	return u.String(), nil
 }

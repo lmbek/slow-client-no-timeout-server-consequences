@@ -10,6 +10,15 @@ services:
     # Working dir and command are defined by the Dockerfile
     # container_name: slow-php-container
 
+  go:
+    image: slow-go
+    build:
+      context: ./go-server
+    ports:
+      - "8081:8081"   # expose Go server on localhost:8081
+    # restart: unless-stopped
+    # container_name: slow-go-container
+
 # Use with:
 # - docker compose up -d        (builds if needed and starts in background)
 # - docker compose up --build   (force rebuild)

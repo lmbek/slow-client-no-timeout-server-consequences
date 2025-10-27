@@ -1,7 +1,7 @@
 # Apache-based PHP server for demo. No/very high timeouts (testing only!)
 # WARNING: Do NOT expose to the internet.
 
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # Put app in /var/www/html
 WORKDIR /var/www/html
